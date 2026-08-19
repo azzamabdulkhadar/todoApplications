@@ -20,35 +20,33 @@ const addTask = () => {
     if(!text) return;
 
     tasks.push({text: text, isCompleted:false});
-    console.log(tasks)  ;
     taskInput.value = '';
+    saveTask();
     updateTaskList(); 
     updateStats();
-    saveTask();
 }
 
 const toggleTaskIsCompleted = (index) =>{
     tasks[index].isCompleted = !tasks[index].isCompleted;
-    console.log(tasks);
+    saveTask();
     updateTaskList();
     updateStats();
-    saveTask();
 }
 
 const deleteTask = (index) => {
     tasks.splice(index,1);
+    saveTask();
     updateTaskList();
     updateStats();
-    saveTask();
 }
 
 const editTask = (index) => {
     const taskInput = document.getElementById("taskInput");
     taskInput.value = tasks[index].text;
     tasks.splice(index,1);
+    saveTask();
     updateTaskList();
     updateStats();
-    saveTask();
 }     
 
 const updateStats = () => {
@@ -59,6 +57,9 @@ const updateStats = () => {
     console.log(progress)
     progressBar.style.width = `${progress}%`;
     document.getElementById("numbers").innerHTML = `${completedTasks}/${totalTasks}`
+    if(tasks.length && completedTasks === totalTasks){
+        celeberation();
+    }
 }
 
 const updateTaskList = () =>{
@@ -89,3 +90,56 @@ e.preventDefault();
 
 addTask();
 });
+
+
+// this code is copy from confetti.js.org website
+
+// Tracks running confetti loops so repeat calls restart the effect
+// instead of stacking several intervals on top of each other.
+let activeIntervals = [];
+
+const cleanupActiveEffects = () => {
+  activeIntervals.forEach((id) => clearInterval(id));
+  activeIntervals = [];
+};
+
+const celeberation = () => {
+  if (typeof confetti !== "function") {
+    console.warn("confetti library not loaded - skipping celebration");
+    return;
+  }
+
+  cleanupActiveEffects();
+const duration = 15 * 1e3,
+  animationEnd = Date.now() + duration,
+  defaults = {
+    startVelocity: 30,
+    spread: 360,
+    ticks: 60,
+    zIndex: 0
+  };
+
+function randomInRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+const interval = setInterval(function() {
+  const timeLeft = animationEnd - Date.now();
+  if (timeLeft <= 0) return clearInterval(interval);
+  const particleCount = 50 * (timeLeft / duration);
+  confetti(Object.assign({}, defaults, {
+    particleCount,
+    origin: {
+      x: randomInRange(.1, .3),
+      y: Math.random() - .2
+    }
+  }));
+  confetti(Object.assign({}, defaults, {
+    particleCount,
+    origin: {
+      x: randomInRange(.7, .9),
+      y: Math.random() - .2
+    }
+  }));
+}, 250);
+activeIntervals.push(interval);
+}
